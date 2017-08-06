@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Narato.Academy.Events.APIContracts.DTO;
 using Narato.Academy.Events.Domain.Managers.Interfaces;
 using Narato.Academy.Events.Domain.Models;
+using Narato.ResponseMiddleware.Models.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Narato.Academy.Events.API.Controllers
@@ -18,6 +20,14 @@ namespace Narato.Academy.Events.API.Controllers
         {
             _eventManager = eventManager;
             _mapper = mapper;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pagesize = 10)
+        {
+            var pagedEvents = await _eventManager.GetAllEvents(page, pagesize);
+            var eventDtos = _mapper.Map<IEnumerable<EventDto>>(pagedEvents.Items);
+            return Ok(new Paged<EventDto>(eventDtos, page, pagesize, pagedEvents.Total));
         }
 
         [HttpGet("{id}", Name = "GetEventById")]
